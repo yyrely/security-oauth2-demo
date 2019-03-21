@@ -3,6 +3,7 @@ package com.security.oauth2.oauth2.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -21,21 +22,23 @@ public class Oauth2Conf extends AuthorizationServerConfigurerAdapter {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+    private MyUserDetailService userDetailService;
+
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         clients.inMemory()
-                .withClient("internet_plus")
-                .secret("internet_plus")
-                //有效时间 2小时
+                .withClient("test")
+                .secret(new BCryptPasswordEncoder().encode("123456"))
                 .accessTokenValiditySeconds(72000)
-                //密码授权模式和刷新令牌
-                .authorizedGrantTypes("refresh_token","password")
+                .authorizedGrantTypes("password","refresh_token")
                 .scopes( "all");
     }
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints
-                .authenticationManager(authenticationManager);
+                .authenticationManager(authenticationManager)
+                .userDetailsService(userDetailService);
     }
 }
